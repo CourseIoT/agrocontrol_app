@@ -3,7 +3,7 @@ import 'package:agrocontrol_app/models/sensor.dart';
 import 'package:flutter/material.dart';
 
 Future<List<Sensor>> fetchSensorData() async {
-  await Future.delayed(const Duration(milliseconds: 800));
+  await Future.delayed(const Duration(milliseconds: 1200));
 
   final random = Random();
   final List<Sensor> sensors = [
@@ -13,7 +13,7 @@ Future<List<Sensor>> fetchSensorData() async {
     Sensor(name: 'Luz Solar', icon: Icons.wb_sunny_outlined, unit: 'lx', value: 75000 + random.nextDouble() * 10000, status: 'Bueno'),
     Sensor(name: 'pH del Suelo', icon: Icons.science_outlined, unit: 'pH', value: 6.2 + random.nextDouble() * 0.5, status: 'Estable'),
   ];
-
+  
   if (sensors[0].value < 60) sensors[0].status = 'Bajo';
   if (sensors[1].value > 28) sensors[1].status = 'Alto';
 
@@ -48,11 +48,14 @@ class _SensorsScreenState extends State<SensorsScreen> {
       backgroundColor: Colors.grey[50],
       body: RefreshIndicator(
         onRefresh: _refreshData,
+        backgroundColor: Colors.white,
+        color: const Color(0xFF2E8B57),
+        strokeWidth: 3.0,
         child: FutureBuilder<List<Sensor>>(
           future: _sensorFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: _CustomLoadingIndicator());
             }
             if (snapshot.hasError) {
               return Center(child: Text('Error al cargar datos: ${snapshot.error}'));
@@ -75,6 +78,58 @@ class _SensorsScreenState extends State<SensorsScreen> {
     );
   }
 }
+
+class _CustomLoadingIndicator extends StatefulWidget {
+  const _CustomLoadingIndicator();
+
+  @override
+  State<_CustomLoadingIndicator> createState() => _CustomLoadingIndicatorState();
+}
+
+class _CustomLoadingIndicatorState extends State<_CustomLoadingIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        RotationTransition(
+          turns: _controller,
+          child: const Icon(
+            Icons.eco_outlined, // Icono de hoja
+            size: 40,
+            color: Color(0xFF2E8B57),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Leyendo sensores...',
+          style: TextStyle(color: Colors.grey.shade700, fontSize: 16),
+        ),
+      ],
+    );
+  }
+}
+
+
+// --- Widget de Tarjeta para Sensor (sin cambios) ---
 
 class _SensorCard extends StatelessWidget {
   final Sensor sensor;
