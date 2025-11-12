@@ -52,7 +52,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       }
       final newTask = Task(
         date: _selectedDate!,
-        hours: double.tryParse(_hoursController.text) ?? 0,
+        hours: int.tryParse(_hoursController.text) ?? 0,
         worker: _selectedWorker!,
       );
       Navigator.of(context).pop(newTask);

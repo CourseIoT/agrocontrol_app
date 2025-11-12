@@ -3,7 +3,6 @@ import 'package:agrocontrol_app/models/task.dart';
 import 'package:agrocontrol_app/models/worker.dart';
 import 'package:agrocontrol_app/presentation/screen/add_task_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class TaskScreen extends StatefulWidget {
@@ -17,7 +16,6 @@ class TaskScreen extends StatefulWidget {
 
 class _TaskScreenState extends State<TaskScreen> {
   static const Color colorPrimary = Color(0xFF043A3A);
-  static const Color colorPrimaryLight = Color(0xFFE6F2F2);
   static const Color colorAccent = Color(0xFF2E8B57);
   static const Color colorError = Color(0xFFD9534F);
 
@@ -28,7 +26,7 @@ class _TaskScreenState extends State<TaskScreen> {
     'Fumigación': [
       Task(date: DateTime(2023, 11, 8), hours: 4, worker: AppData.workers[1]),
       Task(date: DateTime(2023, 11, 2), hours: 3, worker: AppData.workers[2]),
-      Task(date: DateTime(2023, 10, 28), hours: 4.5, worker: AppData.workers[1]),
+      Task(date: DateTime(2023, 10, 28), hours: 4, worker: AppData.workers[1]),
     ],
     'Fertilizantes': [],
   };
@@ -65,45 +63,6 @@ class _TaskScreenState extends State<TaskScreen> {
             : b.date.compareTo(a.date);
       });
     });
-  }
-
-  void _deleteTask(int index) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Confirmar Eliminación'),
-        content: const Text(
-            '¿Estás seguro de que quieres eliminar este registro? Esta acción no se puede deshacer.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            style: TextButton.styleFrom(foregroundColor: Colors.grey.shade700),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () {
-              setState(() {
-                _currentTasks.removeAt(index);
-              });
-              Navigator.of(ctx).pop();
-              HapticFeedback.mediumImpact();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Registro eliminado correctamente'),
-                  backgroundColor: colorError,
-                ),
-              );
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: colorError,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
-    );
   }
 
   void _navigateToAddTask() async {
@@ -158,13 +117,13 @@ class _TaskScreenState extends State<TaskScreen> {
       body: _currentTasks.isEmpty
           ? _buildEmptyState()
           : ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _currentTasks.length,
-        itemBuilder: (context, index) {
-          final task = _currentTasks[index];
-          return _buildTaskCard(task, index);
-        },
-      ),
+              padding: const EdgeInsets.all(16),
+              itemCount: _currentTasks.length,
+              itemBuilder: (context, index) {
+                final task = _currentTasks[index];
+                return _buildTaskCard(task, index);
+              },
+            ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _navigateToAddTask,
         label: const Text('Agregar Registro'),
@@ -175,47 +134,82 @@ class _TaskScreenState extends State<TaskScreen> {
     );
   }
 
-
   Widget _buildTaskCard(Task task, int index) {
     final dateFormat = DateFormat('dd/MM/yyyy');
 
-    return Card(
-      color: Colors.grey.shade100,
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: CircleAvatar(
-          backgroundColor: colorPrimaryLight,
-          foregroundColor: colorPrimary,
-          child: Icon(_getTaskIcon(), size: 22),
-        ),
-        title: Text(
-          task.worker.name,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
-          child: Row(
-            children: [
-              Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade600),
-              const SizedBox(width: 4),
-              Text(dateFormat.format(task.date),
-                  style: TextStyle(color: Colors.grey.shade700)),
-              const SizedBox(width: 12),
-              Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
-              const SizedBox(width: 4),
-              Text('${task.hours}h',
-                  style: TextStyle(color: Colors.grey.shade700)),
+    return Dismissible(
+      key: ObjectKey(task),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        return await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: Colors.white,
+            title: const Text('Confirmar Eliminación'),
+            content: const Text('¿Estás seguro de que quieres eliminar este registro?'),
+            actions: [
+              TextButton(
+                style:  TextButton.styleFrom(foregroundColor: Colors.black),
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                style: FilledButton.styleFrom(backgroundColor: colorError),
+                child: const Text('Eliminar'),
+              ),
             ],
           ),
+        ) ?? false;
+      },
+      onDismissed: (direction) {
+        setState(() {
+          _currentTasks.removeAt(index);
+        });
+      },
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: colorError,
+          borderRadius: BorderRadius.circular(12),
         ),
-        trailing: IconButton(
-          icon: Icon(Icons.delete_outline, color: colorError.withOpacity(0.8)),
-          onPressed: () => _deleteTask(index),
-          tooltip: 'Eliminar',
+        child: const Icon(Icons.delete_outline, color: Colors.white),
+      ),
+      child: Card(
+        color: Colors.grey.shade100,
+        margin: const EdgeInsets.only(bottom: 12),
+        elevation: 2,
+        shadowColor: Colors.black,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          leading: CircleAvatar(
+            backgroundColor: Color(0xFFE6F2F2),
+            foregroundColor: colorPrimary,
+            child: Icon(_getTaskIcon(), size: 22),
+          ),
+          title: Text(
+            task.worker.name,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Row(
+              children: [
+                Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade600),
+                const SizedBox(width: 4),
+                Text(dateFormat.format(task.date),
+                    style: TextStyle(color: Colors.grey.shade700)),
+                const SizedBox(width: 12),
+                Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
+                const SizedBox(width: 4),
+                Text('${task.hours}h',
+                    style: TextStyle(color: Colors.grey.shade700)),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -229,10 +223,11 @@ class _TaskScreenState extends State<TaskScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: colorPrimaryLight,
+              color: Colors.white,
               shape: BoxShape.circle,
+              border: Border.all(color: Colors.grey.shade200, width: 2),
             ),
-            child: Icon(_getTaskIcon(), size: 60, color: colorPrimary.withOpacity(0.5)),
+            child: Icon(_getTaskIcon(), size: 60, color: Colors.grey.shade400),
           ),
           const SizedBox(height: 24),
           Text(

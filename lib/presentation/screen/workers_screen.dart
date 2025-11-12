@@ -39,31 +39,36 @@ class _WorkersScreenState extends State<WorkersScreen> {
                 return Dismissible(
                   key: ObjectKey(worker),
                   direction: DismissDirection.endToStart,
+                  confirmDismiss: (direction) async {
+                    return await showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        backgroundColor: Colors.white,
+                        title: const Text('Confirmar Eliminación'),
+                        content: Text('¿Estás seguro de que quieres eliminar a ${worker.name}?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            child: const Text('Cancelar'),
+                          ),
+                          FilledButton(
+                            onPressed: () => Navigator.of(ctx).pop(true),
+                            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
+                            child: const Text('Eliminar'),
+                          ),
+                        ],
+                      ),
+                    ) ?? false;
+                  },
                   onDismissed: (direction) {
-                    final removedWorker = AppData.workers[index];
-                    
                     setState(() {
                       AppData.workers.removeAt(index);
                     });
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${removedWorker.name} eliminado'),
-                        action: SnackBarAction(
-                          label: 'DESHACER',
-                          onPressed: () {
-                            setState(() {
-                              AppData.workers.insert(index, removedWorker);
-                            });
-                          },
-                        ),
-                      ),
-                    );
                   },
                   background: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8.0),
-                      color: Colors.red.shade700,
+                      color: Color(0xFFD9534F),
                     ),
                     margin: const EdgeInsets.only(bottom: 8.0),
                     alignment: Alignment.centerRight,
