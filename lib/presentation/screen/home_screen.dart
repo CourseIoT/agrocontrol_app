@@ -1,6 +1,5 @@
 import 'package:agrocontrol_app/presentation/screen/fields_screen.dart';
-import 'package:agrocontrol_app/presentation/screen/fumigation_screen.dart';
-import 'package:agrocontrol_app/presentation/screen/irrigation_screen.dart';
+import 'package:agrocontrol_app/presentation/screen/sensors_screen.dart';
 import 'package:agrocontrol_app/presentation/screen/workers_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -16,16 +15,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _views = const [
     FieldsScreen(),
-    IrrigationScreen(),
-    FumigationScreen(),
     WorkersScreen(),
+    SensorsScreen(),
   ];
 
   final List<String> _titles = const [
     '',
-    'Riego',
-    'Fumigación y Fertilización',
     'Empleados',
+    'Sensores',
   ];
 
   @override
@@ -142,22 +139,16 @@ class _AppMenuDrawer extends StatelessWidget {
                     onTap: () => onItemTapped(0),
                   ),
                   _buildDrawerItem(
-                    icon: Icons.water_drop_outlined,
-                    text: 'Riego',
+                    icon: Icons.people_outline,
+                    text: 'Empleados',
                     isSelected: selectedIndex == 1,
                     onTap: () => onItemTapped(1),
                   ),
                   _buildDrawerItem(
-                    icon: Icons.bug_report_outlined,
-                    text: 'Fumigación y Fertilización',
+                    icon: Icons.sensors,
+                    text: 'Sensores',
                     isSelected: selectedIndex == 2,
                     onTap: () => onItemTapped(2),
-                  ),
-                  _buildDrawerItem(
-                    icon: Icons.people_outline,
-                    text: 'Empleados',
-                    isSelected: selectedIndex == 3,
-                    onTap: () => onItemTapped(3),
                   ),
                 ],
               ),

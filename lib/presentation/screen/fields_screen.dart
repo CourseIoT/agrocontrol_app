@@ -83,7 +83,7 @@ class _FieldsScreenState extends State<FieldsScreen> {
               });
               Navigator.of(ctx).pop();
             },
-            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
+            style: FilledButton.styleFrom(backgroundColor: Color(0xFFD9534F)),
             child: const Text('Eliminar'),
           ),
         ],

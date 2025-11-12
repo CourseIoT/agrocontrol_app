@@ -56,11 +56,12 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
               '¿Estás seguro de que quieres marcar esta plantación como finalizada?'),
           actions: [
             TextButton(
+              style:  TextButton.styleFrom(foregroundColor: Colors.black),
               child: const Text('Cancelar'),
               onPressed: () => Navigator.of(ctx).pop(),
             ),
             FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: colorError),
+              style: FilledButton.styleFrom(backgroundColor: Color(0xFFD9534F)),
               child: const Text('Finalizar'),
               onPressed: () {
                 setState(() {
