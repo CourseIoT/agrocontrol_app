@@ -1,4 +1,4 @@
-import 'package:agrocontrol_app/models/field.dart';
+import 'package:agrocontrol_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,22 +11,34 @@ class AddFieldScreen extends StatefulWidget {
 
 class _AddFieldScreenState extends State<AddFieldScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _apiService = ApiService();
+
   final _nameController = TextEditingController();
   final _locationController = TextEditingController();
   final _landSizeController = TextEditingController();
 
-  void _submitForm() {
-    // Validamos el formulario
-    if (_formKey.currentState!.validate()) {
-      // Creamos el nuevo objeto Field
-      final newField = Field(
-        name: _nameController.text,
-        location: _locationController.text,
-        landSize: double.tryParse(_landSizeController.text) ?? 0.0,
-        imageUrl: 'assets/images/farm_background.png',
-      );
+  bool _isLoading = false;
 
-      Navigator.of(context).pop(newField);
+  Future<void> _submitForm() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+
+      try {
+        final newField = await _apiService.createField(
+          _nameController.text,
+          _locationController.text,
+          double.tryParse(_landSizeController.text) ?? 0.0,
+        );
+        
+        Navigator.of(context).pop(newField);
+
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al crear el campo: $e'), backgroundColor: Colors.red),
+        );
+      } finally {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -44,9 +56,7 @@ class _AddFieldScreenState extends State<AddFieldScreen> {
       appBar: AppBar(
         title: const Text('Agregar Nuevo Campo'),
         backgroundColor: const Color(0xFF043A3A),
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
         titleTextStyle: const TextStyle(
           color: Colors.white,
           fontSize: 20,
@@ -77,25 +87,22 @@ class _AddFieldScreenState extends State<AddFieldScreen> {
                 labelText: 'Tamaño (en hectáreas)',
                 icon: Icons.landscape_outlined,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                ],
+                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
               ),
               const SizedBox(height: 32),
-              ElevatedButton.icon(
-                onPressed: _submitForm,
-                icon: const Icon(Icons.save),
-                label: const Text('GUARDAR CAMPO'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade700,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton.icon(
+                      onPressed: _submitForm,
+                      icon: const Icon(Icons.save),
+                      label: const Text('GUARDAR CAMPO'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green.shade700,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
             ],
           ),
         ),
@@ -115,9 +122,7 @@ class _AddFieldScreenState extends State<AddFieldScreen> {
       decoration: InputDecoration(
         labelText: labelText,
         prefixIcon: Icon(icon),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.0),
           borderSide: BorderSide(color: Colors.green.shade700, width: 2.0),

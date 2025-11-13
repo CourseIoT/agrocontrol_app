@@ -1,10 +1,10 @@
+import 'package:agrocontrol_app/models/field.dart';
+import 'package:agrocontrol_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../models/field.dart';
-import 'fields_screen.dart'; // Para poder usar la clase Field
 
 class EditFieldScreen extends StatefulWidget {
-  final Field field; // El campo existente que vamos a editar
+  final Field field;
 
   const EditFieldScreen({super.key, required this.field});
 
@@ -14,9 +14,13 @@ class EditFieldScreen extends StatefulWidget {
 
 class _EditFieldScreenState extends State<EditFieldScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _apiService = ApiService();
+
   late final TextEditingController _nameController;
   late final TextEditingController _locationController;
   late final TextEditingController _landSizeController;
+  
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -26,15 +30,27 @@ class _EditFieldScreenState extends State<EditFieldScreen> {
     _landSizeController = TextEditingController(text: widget.field.landSize.toString());
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final updatedField = Field(
-        name: _nameController.text,
-        location: _locationController.text,
-        landSize: double.tryParse(_landSizeController.text) ?? 0.0,
-        imageUrl: widget.field.imageUrl,
-      );
-      Navigator.of(context).pop(updatedField);
+      setState(() => _isLoading = true);
+
+      try {
+        final updatedField = await _apiService.updateField(
+          widget.field.id,
+          _nameController.text,
+          _locationController.text,
+          double.tryParse(_landSizeController.text) ?? 0.0,
+        );
+        
+        Navigator.of(context).pop(updatedField);
+
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al actualizar'), backgroundColor: Colors.red),
+        );
+      } finally {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -66,42 +82,31 @@ class _EditFieldScreenState extends State<EditFieldScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildTextFormField(
-                controller: _nameController,
-                labelText: 'Nombre del Campo',
-                icon: Icons.grass,
-              ),
+              _buildTextFormField(controller: _nameController, labelText: 'Nombre del Campo', icon: Icons.grass),
               const SizedBox(height: 16),
-              _buildTextFormField(
-                controller: _locationController,
-                labelText: 'Ubicación',
-                icon: Icons.location_on_outlined,
-              ),
+              _buildTextFormField(controller: _locationController, labelText: 'Ubicación', icon: Icons.location_on_outlined),
               const SizedBox(height: 16),
               _buildTextFormField(
                 controller: _landSizeController,
                 labelText: 'Tamaño (en hectáreas)',
                 icon: Icons.landscape_outlined,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                ],
+                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
               ),
               const SizedBox(height: 32),
-              ElevatedButton.icon(
-                onPressed: _submitForm,
-                icon: const Icon(Icons.save),
-                label: const Text('ACTUALIZAR CAMPO'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade700,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton.icon(
+                      onPressed: _submitForm,
+                      icon: const Icon(Icons.save),
+                      label: const Text('Actualizar'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green.shade700,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
             ],
           ),
         ),
@@ -121,9 +126,7 @@ class _EditFieldScreenState extends State<EditFieldScreen> {
       decoration: InputDecoration(
         labelText: labelText,
         prefixIcon: Icon(icon),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.0),
           borderSide: BorderSide(color: Colors.green.shade700, width: 2.0),

@@ -1,4 +1,4 @@
-import 'package:agrocontrol_app/models/worker.dart';
+import 'package:agrocontrol_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 
 class AddWorkerScreen extends StatefulWidget {
@@ -11,17 +11,37 @@ class AddWorkerScreen extends StatefulWidget {
 class _AddWorkerScreenState extends State<AddWorkerScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _documentController = TextEditingController();
+  bool _isLoading = false;
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final newWorker = Worker(name: _nameController.text);
-      Navigator.of(context).pop(newWorker);
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final newWorker = await ApiService().createWorker(
+          _nameController.text,
+          _documentController.text,
+        );
+        Navigator.of(context).pop(newWorker);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al crear el trabajador: $e')),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _documentController.dispose();
     super.dispose();
   }
 
@@ -48,7 +68,7 @@ class _AddWorkerScreenState extends State<AddWorkerScreen> {
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'Nombre del Empleado',
+                  labelText: 'Nombre Completo',
                   prefixIcon: const Icon(Icons.person_outline),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
@@ -66,9 +86,31 @@ class _AddWorkerScreenState extends State<AddWorkerScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _documentController,
+                decoration: InputDecoration(
+                  labelText: 'Número de Documento',
+                  prefixIcon: const Icon(Icons.badge_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                    borderSide: BorderSide(color: Colors.green.shade700, width: 2.0),
+                  ),
+                  floatingLabelStyle: const TextStyle(color: Colors.black),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'El número de documento es obligatorio';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: _submitForm,
+                onPressed: _isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green.shade600,
                   foregroundColor: Colors.white,
@@ -81,7 +123,9 @@ class _AddWorkerScreenState extends State<AddWorkerScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                child: const Text('GUARDAR EMPLEADO'),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('Guardar'),
               ),
             ],
           ),
