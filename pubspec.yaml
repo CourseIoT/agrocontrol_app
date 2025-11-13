@@ -68,7 +68,23 @@ flutter:
     - assets/images/farm_background.png
     - assets/images/google_logo.png
     - assets/images/img.png
+    - assets/images/treatment.png
+    - assets/images/harvest.png
+    - assets/images/seeding.png
+    - assets/images/irrigation.png
     - assets/images/user_placeholder.png
+    - assets/images/female_1.png
+    - assets/images/female_2.png
+    - assets/images/female_3.png
+    - assets/images/male_1.png
+    - assets/images/male_2.png
+    - assets/images/male_3.png
+    - assets/images/field_1.png
+    - assets/images/field_2.png
+    - assets/images/field_3.png
+    - assets/images/field_4.png
+
+
 
 
   # The following line ensures that the Material Icons font is
