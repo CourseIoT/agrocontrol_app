@@ -148,42 +148,42 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
       final Map<String, dynamic> params = {
         'agriculturalProcessId': widget.agriculturalProcessId,
         'date': DateFormat('yyyy-MM-dd').format(_selectedDate!), 'activityType': _normalizedActivityType,
-    };
+      };
 
-    switch (_normalizedActivityType) {
-    case 'IRRIGATION':
-    params['hoursIrrigated'] = double.tryParse(_hoursIrrigatedController.text) ?? 0.0;
-    break;
-    case 'SEEDING':
-    params['plantType'] = _plantTypeController.text;
-    params['quantityPlanted'] = int.tryParse(_quantityPlantedController.text) ?? 0;
-    break;
-    case 'CROP_TREATMENT':
-    params['treatmentType'] = _selectedTreatmentType;
-    break;
-    case 'HARVEST':
-    params['quantityInKg'] = double.tryParse(_quantityInKgController.text) ?? 0.0;
-    params['pricePerKg'] = double.tryParse(_pricePerKgController.text) ?? 0.0;
-    break;
-    }
+      switch (_normalizedActivityType) {
+        case 'IRRIGATION':
+          params['hoursIrrigated'] = double.tryParse(_hoursIrrigatedController.text) ?? 0.0;
+          break;
+        case 'SEEDING':
+          params['plantType'] = _plantTypeController.text;
+          params['quantityPlanted'] = int.tryParse(_quantityPlantedController.text) ?? 0;
+          break;
+        case 'CROP_TREATMENT':
+          params['treatmentType'] = _selectedTreatmentType;
+          break;
+        case 'HARVEST':
+          params['quantityInKg'] = double.tryParse(_quantityInKgController.text) ?? 0.0;
+          params['pricePerKg'] = double.tryParse(_pricePerKgController.text) ?? 0.0;
+          break;
+      }
 
-    try {
-    await _apiService.addActivity(params);
-    ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Actividad registrada con éxito'), backgroundColor: Colors.green),
-    );
-    Navigator.of(context).pop(true);
+      try {
+        await _apiService.addActivity(params);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Actividad registrada con éxito'), backgroundColor: Colors.green),
+        );
+        Navigator.of(context).pop(true);
 
-    } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Error al registrar la actividad'), backgroundColor: Colors.red),
-    );
-    } finally {
-    if(mounted) {
-    setState(() => _isLoading = false);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al registrar la actividad'), backgroundColor: Colors.red),
+        );
+      } finally {
+        if(mounted) {
+          setState(() => _isLoading = false);
+        }
+      }
     }
-    }
-  }
   }
 
   @override
@@ -232,10 +232,10 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                   labelText: 'Asignar a trabajador',
                   prefixIcon: _isLoadingWorkers
                       ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
                       : const Icon(Icons.person_outline),
                   border: _defaultBorder,
                   enabledBorder: _defaultBorder,
@@ -245,8 +245,8 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                 hint: Text(_isLoadingWorkers
                     ? 'Cargando trabajadores...'
                     : _workers.isEmpty
-                        ? 'No hay trabajadores disponibles'
-                        : 'Seleccionar trabajador'),
+                    ? 'No hay trabajadores disponibles'
+                    : 'Seleccionar trabajador'),
                 items: _workers.map((Worker worker) {
                   return DropdownMenuItem<int>(
                     value: worker.id,
@@ -256,10 +256,10 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                 onChanged: _isLoadingWorkers || _workers.isEmpty
                     ? null
                     : (int? newValue) {
-                        setState(() {
-                          _selectedWorkerId = newValue;
-                        });
-                      },
+                  setState(() {
+                    _selectedWorkerId = newValue;
+                  });
+                },
               ),
               const SizedBox(height: 24),
               ..._buildSpecificFields(),

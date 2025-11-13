@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class CustomLoadingIndicator extends StatefulWidget {
-  final String message;
-  const CustomLoadingIndicator({super.key, required this.message});
+  final String? message;
+  const CustomLoadingIndicator({super.key, this.message});
 
   @override
   State<CustomLoadingIndicator> createState() => _CustomLoadingIndicatorState();
@@ -40,11 +40,13 @@ class _CustomLoadingIndicatorState extends State<CustomLoadingIndicator>
             color: Color(0xFF2E8B57),
           ),
         ),
-        const SizedBox(height: 16),
-        Text(
-          widget.message,
-          style: TextStyle(color: Colors.grey.shade700, fontSize: 16),
-        ),
+        if (widget.message != null) ...[
+          const SizedBox(height: 16),
+          Text(
+            widget.message!,
+            style: TextStyle(color: Colors.grey.shade700, fontSize: 16),
+          ),
+        ]
       ],
     );
   }

@@ -1,5 +1,6 @@
 import 'package:agrocontrol_app/models/agricultural_process.dart';
 import 'package:agrocontrol_app/models/field.dart';
+import 'package:agrocontrol_app/presentation/widgets/custom_loading_indicator.dart';
 import 'package:agrocontrol_app/services/api_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -149,7 +150,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     future: _profileDataFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const Center(
+                            child: CustomLoadingIndicator(
+                                message: 'Cargando resumen...'));
                       }
                       if (snapshot.hasError) {
                         return Center(
@@ -160,7 +163,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       final data = snapshot.data!;
                       final fields = data['fields'] as List<Field>;
                       final processes =
-                      data['processes'] as List<AgriculturalProcess>;
+                          data['processes'] as List<AgriculturalProcess>;
                       final totalArea = fields.fold<double>(
                           0, (sum, item) => sum + item.landSize);
 
@@ -181,7 +184,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 16),
                   _buildInfoCard(profile),
                   const SizedBox(height: 24),
-
                 ],
               ),
             ),
@@ -201,8 +203,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildStatItem(
-                CupertinoIcons.tree, '$fieldCount', 'Campos'),
+            _buildStatItem(CupertinoIcons.tree, '$fieldCount', 'Campos'),
             _buildStatItem(CupertinoIcons.fullscreen,
                 '${totalArea.toStringAsFixed(0)} ha', 'Total'),
             _buildStatItem(CupertinoIcons.arrow_2_circlepath,

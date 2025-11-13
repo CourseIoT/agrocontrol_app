@@ -1,3 +1,4 @@
+import 'package:agrocontrol_app/presentation/widgets/custom_loading_indicator.dart';
 import 'package:agrocontrol_app/services/api_service.dart';
 import 'package:agrocontrol_app/services/session_service.dart';
 import 'package:flutter/gestures.dart';
@@ -109,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     OutlinedButton.icon(
                       icon: Image.asset('assets/images/google_logo.png', height: 24.0),
                       label: const Text('Continuar con google'),
-                      onPressed: () { /* TODO */ },
+                      onPressed: () { },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.black,
                         backgroundColor: Colors.white.withAlpha(230),
@@ -157,19 +158,19 @@ class _LoginScreenState extends State<LoginScreen> {
                        validator: (value) => (value == null || value.isEmpty) ? 'La contraseña no puede estar vacía' : null,
                     ),
                     const SizedBox(height: 24.0),
-                    _isLoading 
-                      ? const Center(child: CircularProgressIndicator(color: Colors.white)) 
-                      : OutlinedButton(
-                          onPressed: _submitForm,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.black,
-                            backgroundColor: Colors.white.withAlpha(230),
-                            side: const BorderSide(color: Colors.black, width: 2.0),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+                    _isLoading
+                        ? const Center(child: CustomLoadingIndicator())
+                        : OutlinedButton(
+                            onPressed: _submitForm,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.black,
+                              backgroundColor: Colors.white.withAlpha(230),
+                              side: const BorderSide(color: Colors.black, width: 2.0),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+                            ),
+                            child: const Text('Log In'),
                           ),
-                          child: const Text('Log In'),
-                        ),
                     const SizedBox(height: 16.0),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
