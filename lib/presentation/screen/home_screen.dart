@@ -1,6 +1,8 @@
 import 'package:agrocontrol_app/presentation/screen/fields_screen.dart';
+import 'package:agrocontrol_app/presentation/screen/profile_screen.dart';
 import 'package:agrocontrol_app/presentation/screen/sensors_screen.dart';
 import 'package:agrocontrol_app/presentation/screen/workers_screen.dart';
+import 'package:agrocontrol_app/services/session_service.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -91,6 +93,8 @@ class _AppMenuDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final session = SessionService();
+
     return Drawer(
       child: Container(
         color: _menuBgColor,
@@ -103,28 +107,44 @@ class _AppMenuDrawer extends StatelessWidget {
                 left: 20.0,
                 bottom: 20.0,
               ),
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 25,
-                    backgroundImage: AssetImage('assets/images/user_placeholder.png'),
-                    backgroundColor: Colors.white,
-                  ),
-                  const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Harold",
-                        style: TextStyle(
-                          color: _textColor,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProfileScreen()));
+                },
+                child: Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 25,
+                      backgroundImage: AssetImage('assets/images/user_placeholder.png'),
+                      backgroundColor: Colors.white,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            session.userProfile?.fullName ?? 'Usuario',
+                            style: TextStyle(
+                              color: _textColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            'Ver Perfil',
+                            style: TextStyle(
+                              color: _iconColor,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
             const Divider(color: Colors.white24, height: 1),
@@ -144,7 +164,7 @@ class _AppMenuDrawer extends StatelessWidget {
                     isSelected: selectedIndex == 1,
                     onTap: () => onItemTapped(1),
                   ),
-                  _buildDrawerItem(
+                   _buildDrawerItem(
                     icon: Icons.sensors,
                     text: 'Sensores',
                     isSelected: selectedIndex == 2,
@@ -160,9 +180,9 @@ class _AppMenuDrawer extends StatelessWidget {
                 icon: Icons.logout,
                 text: 'Cerrar Sesión',
                 isSelected: false,
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushReplacementNamed(context, '/login');
+                onTap: () async {
+                  await session.clearSession();
+                  Navigator.of(context).pushReplacementNamed('/login');
                 },
               ),
             ),
