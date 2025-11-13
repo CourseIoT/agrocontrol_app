@@ -67,7 +67,6 @@ flutter:
   assets:
     - assets/images/farm_background.png
     - assets/images/google_logo.png
-    - assets/images/img.png
     - assets/images/treatment.png
     - assets/images/harvest.png
     - assets/images/seeding.png

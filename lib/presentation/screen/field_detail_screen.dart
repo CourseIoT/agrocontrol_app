@@ -1,6 +1,5 @@
 import 'package:agrocontrol_app/models/activity.dart';
-import 'package:agrocontrol_app/models/agricultural_process.dart';
-import 'package:agrocontrol_app/models/field.dart';
+import 'package:agrocontrol_app/models/agricultural_process.dart';import 'package:agrocontrol_app/models/field.dart';
 import 'package:agrocontrol_app/presentation/screen/add_activity_screen.dart';
 import 'package:agrocontrol_app/presentation/widgets/custom_loading_indicator.dart';
 import 'package:agrocontrol_app/services/api_service.dart';
@@ -448,7 +447,7 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Proceso #${process.id}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: process.isFinished ? Colors.grey.shade700 : colorPrimary)),
+            Text('Proceso de Cultivo', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: process.isFinished ? Colors.grey.shade700 : colorPrimary)),
             const SizedBox(height: 16),
             _buildInfoRow(Icons.calendar_today_outlined, 'Fecha Inicio', dateFormat.format(process.startDate)),
             const SizedBox(height: 12),
@@ -462,7 +461,7 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
 
   Widget _buildActivityItemCard(Activity activity, AgriculturalProcess process) {
     final dateFormat = DateFormat('dd/MM/yyyy');
-    final statusText = activity.activityStatus.replaceAll('_', ' ').toLowerCase();
+    final statusText = _getStatusText(activity.activityStatus);
     final statusColor = _getStatusColor(activity.activityStatus);
     String activityTitle = activity.activityType.replaceAll('_', ' ').split(' ').map((str) => str.isEmpty ? '' : '${str[0].toUpperCase()}${str.substring(1).toLowerCase()}').join(' ');
     final String? assetPath = _getActivityAsset(activity.activityType);
@@ -535,6 +534,25 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
     }
     if (details.isEmpty) return [];
     return [Wrap(spacing: 16.0, runSpacing: 12.0, children: details)];
+  }
+
+  String _getStatusText(String status) {
+    switch (status) {
+      case 'IN_PROGRESS':
+        return 'En Progreso';
+      case 'COMPLETED':
+        return 'Completado';
+      case 'CANCELLED':
+        return 'Cancelado';
+      case 'NOT_STARTED':
+        return 'No iniciado';
+        case 'FINISHED':
+        return 'Finalizado';
+      case 'PENDING':
+        return 'Pendiente';
+      default:
+        return status.replaceAll('_', ' ').toLowerCase();
+    }
   }
 
   Color _getStatusColor(String status) {

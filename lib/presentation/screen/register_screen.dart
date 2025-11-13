@@ -14,7 +14,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _apiService = ApiService();
 
-  // Controladores para cada campo
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -25,6 +24,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _dniController = TextEditingController();
 
   bool _isLoading = false;
+
+  final Color _focusGreen = Colors.green.shade700;
+  final OutlineInputBorder _defaultBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(12.0),
+    borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
+  );
+  final OutlineInputBorder _focusedBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(12.0),
+    borderSide: BorderSide(color: Colors.green.shade700, width: 2.0),
+  );
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
@@ -42,7 +51,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       try {
         final user = await _apiService.signUpAgriculturalProducer(data);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('¡Registro exitoso para ${user.email}!')),
         );
@@ -91,8 +100,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 _buildTextFormField(controller: _fullNameController, labelText: 'Nombre Completo'),
                 const SizedBox(height: 16),
                 _buildTextFormField(
-                    controller: _emailController, 
-                    labelText: 'Email', 
+                    controller: _emailController,
+                    labelText: 'Email',
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || !value.contains('@') || !value.contains('.')) {
@@ -104,8 +113,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 _buildTextFormField(controller: _passwordController, labelText: 'Contraseña', obscureText: true),
                 const SizedBox(height: 16),
                 _buildTextFormField(
-                    controller: _confirmPasswordController, 
-                    labelText: 'Confirma la contraseña', 
+                    controller: _confirmPasswordController,
+                    labelText: 'Confirma la contraseña',
                     obscureText: true,
                     validator: (value) {
                       if (value != _passwordController.text) {
@@ -118,9 +127,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 16),
                 _buildTextFormField(controller: _countryController, labelText: 'País'),
                 const SizedBox(height: 16),
-                 _buildTextFormField(
-                    controller: _phoneController, 
-                    labelText: 'Teléfono', 
+                _buildTextFormField(
+                    controller: _phoneController,
+                    labelText: 'Teléfono',
                     keyboardType: TextInputType.phone,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     validator: (value) {
@@ -131,8 +140,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     }),
                 const SizedBox(height: 16),
                 _buildTextFormField(
-                    controller: _dniController, 
-                    labelText: 'DNI', 
+                    controller: _dniController,
+                    labelText: 'DNI',
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     validator: (value) {
@@ -146,15 +155,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 _isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : ElevatedButton(
-                        onPressed: _submitForm,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green.shade500,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        child: const Text("REGISTRAR"),
-                      ),
+                  onPressed: _submitForm,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade500,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  child: const Text("REGISTRAR"),
+                ),
                 const SizedBox(height: 16),
 
                 Text.rich(
@@ -196,9 +205,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
       inputFormatters: inputFormatters,
       validator: validator,
       obscureText: obscureText,
+      cursorColor: _focusGreen,
       decoration: InputDecoration(
         labelText: labelText,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
+        labelStyle: TextStyle(color: Colors.grey.shade700),
+        floatingLabelStyle: TextStyle(color: _focusGreen),
+        border: _defaultBorder,
+        enabledBorder: _defaultBorder,
+        focusedBorder: _focusedBorder,
       ),
     );
   }

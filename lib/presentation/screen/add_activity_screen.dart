@@ -38,6 +38,16 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
   int? _selectedWorkerId;
   bool _isLoadingWorkers = true;
 
+  final Color _focusGreen = Colors.green.shade700;
+  final OutlineInputBorder _defaultBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(8.0),
+    borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
+  );
+  final OutlineInputBorder _focusedBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(8.0),
+    borderSide: BorderSide(color: Colors.green.shade700, width: 2.0),
+  );
+
   @override
   void initState() {
     super.initState();
@@ -197,11 +207,14 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                 controller: _dateController,
                 readOnly: true,
                 onTap: _pickDate,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Fecha de la Actividad',
                   hintText: 'Seleccionar fecha',
-                  prefixIcon: Icon(Icons.calendar_today),
-                  border: OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.calendar_today),
+                  border: _defaultBorder,
+                  enabledBorder: _defaultBorder,
+                  focusedBorder: _focusedBorder,
+                  floatingLabelStyle: TextStyle(color: _focusGreen),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -224,7 +237,10 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.person_outline),
-                  border: const OutlineInputBorder(),
+                  border: _defaultBorder,
+                  enabledBorder: _defaultBorder,
+                  focusedBorder: _focusedBorder,
+                  floatingLabelStyle: TextStyle(color: _focusGreen),
                 ),
                 hint: Text(_isLoadingWorkers
                     ? 'Cargando trabajadores...'
@@ -291,9 +307,12 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
           DropdownButtonFormField<String>(
             dropdownColor: Colors.white,
             value: _selectedTreatmentType,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Tipo de Tratamiento',
-              border: OutlineInputBorder(),
+              border: _defaultBorder,
+              enabledBorder: _defaultBorder,
+              focusedBorder: _focusedBorder,
+              floatingLabelStyle: TextStyle(color: _focusGreen),
             ),
             items: const [
               DropdownMenuItem(
@@ -344,9 +363,13 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
   }) {
     return TextFormField(
       controller: controller,
+      cursorColor: _focusGreen,
       decoration: InputDecoration(
         labelText: labelText,
-        border: const OutlineInputBorder(),
+        border: _defaultBorder,
+        enabledBorder: _defaultBorder,
+        focusedBorder: _focusedBorder,
+        floatingLabelStyle: TextStyle(color: _focusGreen),
       ),
       keyboardType: keyboardType,
       validator: (value) {
