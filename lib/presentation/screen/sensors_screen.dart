@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:agrocontrol_app/models/sensor.dart';
+import 'package:agrocontrol_app/presentation/widgets/custom_loading_indicator.dart';
 import 'package:flutter/material.dart';
 
 Future<List<Sensor>> fetchSensorData() async {
@@ -55,7 +56,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
           future: _sensorFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: _CustomLoadingIndicator());
+              return const Center(child: CustomLoadingIndicator(message: 'Leyendo sensores...'));
             }
             if (snapshot.hasError) {
               return Center(child: Text('Error al cargar datos: ${snapshot.error}'));
@@ -79,57 +80,6 @@ class _SensorsScreenState extends State<SensorsScreen> {
   }
 }
 
-class _CustomLoadingIndicator extends StatefulWidget {
-  const _CustomLoadingIndicator();
-
-  @override
-  State<_CustomLoadingIndicator> createState() => _CustomLoadingIndicatorState();
-}
-
-class _CustomLoadingIndicatorState extends State<_CustomLoadingIndicator>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        RotationTransition(
-          turns: _controller,
-          child: const Icon(
-            Icons.eco_outlined, // Icono de hoja
-            size: 40,
-            color: Color(0xFF2E8B57),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Leyendo sensores...',
-          style: TextStyle(color: Colors.grey.shade700, fontSize: 16),
-        ),
-      ],
-    );
-  }
-}
-
-
-// --- Widget de Tarjeta para Sensor (sin cambios) ---
 
 class _SensorCard extends StatelessWidget {
   final Sensor sensor;
