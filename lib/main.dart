@@ -1,9 +1,14 @@
 import 'package:agrocontrol_app/presentation/screen/home_screen.dart';
 import 'package:agrocontrol_app/presentation/screen/register_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'presentation/screen/login_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  await initializeDateFormatting('es_ES', null);
+
   runApp(const MyApp());
 }
 

@@ -1,6 +1,7 @@
-import 'package:agrocontrol_app/data/app_data.dart';
 import 'package:agrocontrol_app/models/worker.dart';
 import 'package:agrocontrol_app/presentation/screen/add_worker_screen.dart';
+import 'package:agrocontrol_app/presentation/widgets/custom_loading_indicator.dart';
+import 'package:agrocontrol_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 
 class WorkersScreen extends StatefulWidget {
@@ -11,84 +12,114 @@ class WorkersScreen extends StatefulWidget {
 }
 
 class _WorkersScreenState extends State<WorkersScreen> {
+  late Future<List<Worker>> _workersFuture;
+  final _femaleImagePaths = [
+    'assets/images/female_1.png',
+    'assets/images/female_2.png',
+    'assets/images/female_3.png',
+  ];
+  final _maleImagePaths = [
+    'assets/images/male_1.png',
+    'assets/images/male_2.png',
+    'assets/images/male_3.png',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _workersFuture = _fetchWorkers();
+  }
+
+  Future<List<Worker>> _fetchWorkers() async {
+    await Future.delayed(const Duration(seconds: 2));
+    return ApiService().getWorkersByProducerId();
+  }
+
+  void _handleRefresh() {
+    setState(() {
+      _workersFuture = _fetchWorkers();
+    });
+  }
 
   void _navigateToAddWorker() async {
-    final newWorker = await Navigator.of(context).push(
+    final result = await Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => const AddWorkerScreen()),
     );
 
-    if (newWorker != null && newWorker is Worker) {
-      AppData.workers.add(newWorker);
-      setState(() {});
+    if (result != null && result is Worker) {
+      _handleRefresh();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: RefreshIndicator(
+        backgroundColor: Colors.white,
+        color: const Color(0xFF2E8B57),
+        strokeWidth: 3.0,
+        onRefresh: () async => _handleRefresh(),
+        child: FutureBuilder<List<Worker>>(
+          future: _workersFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CustomLoadingIndicator(message: 'Cargando trabajadores...'),
+              );
+            }
+            if (snapshot.hasError) {
+              return Center(
+                  child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text('Error al cargar trabajadores: ${snapshot.error}'),
+              ));
+            }
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(
+                child: Text('No hay empleados registrados.'),
+              );
+            }
 
-      body: AppData.workers.isEmpty
-          ? const Center(
-              child: Text('No hay empleados registrados.'),
-            )
-          : ListView.builder(
+            final workers = snapshot.data!;
+            return ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16.0),
-              itemCount: AppData.workers.length,
+              itemCount: workers.length,
               itemBuilder: (context, index) {
-                final worker = AppData.workers[index];
-                return Dismissible(
-                  key: ObjectKey(worker),
-                  direction: DismissDirection.endToStart,
-                  confirmDismiss: (direction) async {
-                    return await showDialog(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        backgroundColor: Colors.white,
-                        title: const Text('Confirmar Eliminación'),
-                        content: Text('¿Estás seguro de que quieres eliminar a ${worker.name}?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(ctx).pop(false),
-                            child: const Text('Cancelar'),
-                          ),
-                          FilledButton(
-                            onPressed: () => Navigator.of(ctx).pop(true),
-                            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
-                            child: const Text('Eliminar'),
-                          ),
-                        ],
-                      ),
-                    ) ?? false;
-                  },
-                  onDismissed: (direction) {
-                    setState(() {
-                      AppData.workers.removeAt(index);
-                    });
-                  },
-                  background: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8.0),
-                      color: Color(0xFFD9534F),
+                final worker = workers[index];
+                final firstName = worker.fullName.split(' ').first.toLowerCase();
+
+                List<String> imagePathList;
+                if (firstName.endsWith('a')) {
+                  imagePathList = _femaleImagePaths;
+                } else if (firstName.endsWith('o')) {
+                  imagePathList = _maleImagePaths;
+                } else {
+                  imagePathList = [..._femaleImagePaths, ..._maleImagePaths];
+                }
+
+                final imagePath = imagePathList[worker.id % imagePathList.length];
+
+                return Card(
+                  color: Colors.grey.shade50,
+                  margin: const EdgeInsets.only(bottom: 8.0),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: AssetImage(imagePath),
+                      backgroundColor: Colors.grey.shade300,
                     ),
-                    margin: const EdgeInsets.only(bottom: 8.0),
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: const Icon(Icons.delete_outline, color: Colors.white),
-                  ),
-                  child: Card(
-                    color: Colors.grey.shade50,
-                    margin: const EdgeInsets.only(bottom: 8.0),
-                    child: ListTile(
-                      leading: const Icon(Icons.person),
-                      title: Text(worker.name),
-                    ),
+                    title: Text(worker.fullName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text('Doc: ${worker.documentNumber}'),
                   ),
                 );
               },
-            ),
+            );
+          },
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAddWorker,
-        backgroundColor: Colors.green.shade700,
+        backgroundColor: const Color(0xFF2E8B57),
         tooltip: 'Agregar Empleado',
         child: const Icon(Icons.add, color: Colors.white),
       ),
